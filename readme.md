@@ -6,7 +6,7 @@
 ## Install
 
 ```bash
-composer global install mmhk/vendor-phar
+composer global require mmhk/vendor-phar
 ```
 
 ## RUN
