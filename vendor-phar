@@ -1,0 +1,47 @@
+#!/usr/bin/env php
+<?php
+$vendor_paths = [
+    __DIR__,
+    dirname(__DIR__),
+    dirname(dirname(__DIR__)),
+    dirname(dirname(dirname(__DIR__))),
+];
+$vendor_paths = array_filter($vendor_paths, function ($val) {
+    $autoload_path =  $val.'/vendor/autoload.php';
+    if (file_exists($autoload_path)) {
+        require_once($autoload_path);
+        return true;
+    }
+    return false;
+});
+if (empty($vendor_paths)) {
+    die("Reader can not load vendor!\n");
+}
+if (php_sapi_name() != 'cli') {
+    exit("Please run in cli! \n");
+}
+
+$current_path = dirname(realpath($argv[0]));
+
+$getOpt = new \GetOpt\GetOpt([
+    \GetOpt\Option::create('v', 'vendor', \GetOpt\GetOpt::OPTIONAL_ARGUMENT)
+        ->setDescription('vendor dir path')
+        ->setDefaultValue($current_path.'/vendor'),
+    \GetOpt\Option::create('o', 'output', \GetOpt\GetOpt::OPTIONAL_ARGUMENT)
+        ->setDescription('output dir path')
+        ->setDefaultValue($current_path),
+    \GetOpt\Option::create('h','help', \GetOpt\GetOpt::NO_ARGUMENT)
+        ->setDescription('Show this help and quit'),
+]);
+
+$getOpt->process();
+
+if ($getOpt->getOption('help')) {
+    exit(PHP_EOL. $getOpt->getHelpText());
+}
+
+$vendor = $getOpt->getOption('vendor');
+$output = $getOpt->getOption('output');
+
+$packager = new \MMHK\VendorPhar\Packager($vendor);
+$packager->export($output);

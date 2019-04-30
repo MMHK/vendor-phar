@@ -1,0 +1,23 @@
+{
+    "name": "mmhk/vendor-phar",
+    "description": "pack all vendor files to phar",
+    "type": "project",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "SamZhou",
+            "email": "sam@mixmedia.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "phpunit/phpunit": "6.*",
+        "ulrichsg/getopt-php": "^3.2"
+    },
+    "autoload": {
+        "psr-4" : {
+            "MMHK\\VendorPhar\\": "src/"
+        }
+    },
+    "bin": ["vendor-phar"]
+}
