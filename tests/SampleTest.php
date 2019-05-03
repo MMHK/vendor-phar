@@ -29,4 +29,12 @@ class SampleTest extends \PHPUnit\Framework\TestCase
 
         var_dump($path);
     }
+
+    public function test_preg_match() {
+        $path = '/readme.md';
+
+        $result = preg_match('/sebastian\/(.*)/i', $path);
+
+        var_dump($result);
+    }
 }

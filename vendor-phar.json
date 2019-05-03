@@ -1,0 +1,9 @@
+{
+  "baseDir": "D:/_Sam/TestProject/PHP/vendor-phar/",
+  "vendorDir": "D:/_Sam/TestProject/PHP/vendor-phar/vendor",
+  "exclude": [
+    "phpunit/",
+    "regex:/bin\\/(.*)/i",
+    "regex:/sebastian\\/(.*)/i"
+  ]
+}

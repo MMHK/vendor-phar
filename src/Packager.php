@@ -16,12 +16,21 @@ class Packager
      * @var string
      */
     protected $vendor_dir;
+
+    protected $default_excludes = [
+        '/.',       //忽略隐藏文件
+        '/tests',   //忽略测试文件
+    ];
+
+    protected $excludes = [];
     /**
      * Packager constructor.
      */
-    public function __construct($vendor)
+    public function __construct($vendor, $excludes = [])
     {
         $this->vendor_dir = str_replace(DIRECTORY_SEPARATOR, '/', $vendor);
+
+        $this->excludes = array_merge($this->default_excludes, $excludes);
     }
 
 
@@ -38,7 +47,7 @@ class Packager
         $vendor_base_path = '/' . rtrim($vendor_base_path, '/');
 
         $phar->startBuffering();
-        $vendor_list = new \ArrayIterator($this->getVendorFiles($this->vendor_dir));
+        $vendor_list = new \ArrayIterator($this->getVendorFiles($this->vendor_dir, $this->excludes));
         $phar->buildFromIterator($vendor_list, $this->vendor_dir);
         $this->fixBaseDir($phar);
         $phar->setStub("
@@ -113,9 +122,10 @@ __HALT_COMPILER();
     /**
      * 获取 vendor 目录的所有文件
      * @param string $vendor_dir
+     * @param array $exlcudes
      * @return array
      */
-    public function getVendorFiles($vendor_dir) {
+    public function getVendorFiles($vendor_dir, $exlcudes = []) {
         $directory = new \RecursiveDirectoryIterator($vendor_dir);
         $iterator = new \RecursiveIteratorIterator($directory);
         $files = [];
@@ -130,25 +140,40 @@ __HALT_COMPILER();
                 continue;
             }
             $path = str_replace(DIRECTORY_SEPARATOR, '/', $info->getRealPath());
+            $path = str_replace($vendor_dir, '', $path);
 
-            /**
-             * 忽略隐藏文件
-             */
-            if (stripos($path, '/.') !== false) {
+
+            if ($this->matchExclude($path, $exlcudes)) {
                 continue;
             }
-            /**
-             * 忽略测试文件
-             */
-            if (stripos($path, '/tests') !== false) {
-                continue;
-            }
-
 
             $files[] = $info;
         }
 
         return $files;
+    }
+
+    /**
+     * 判定路径忽略模式
+     * @param $path
+     * @param array $exlcudes
+     * @return bool
+     */
+    public function matchExclude($path, $exlcudes = []) {
+        foreach ($exlcudes as $rule) {
+            if (stripos($rule, 'regex') !== false) {
+                $rule = str_replace('regex:', '', $rule);
+                if (preg_match($rule, $path)) {
+                    return true;
+                }
+            }
+
+            if (stripos($path, $rule) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function getRelativePath($from, $to)

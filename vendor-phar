@@ -30,6 +30,9 @@ $getOpt = new \GetOpt\GetOpt([
     \GetOpt\Option::create('o', 'output', \GetOpt\GetOpt::OPTIONAL_ARGUMENT)
         ->setDescription('output dir path')
         ->setDefaultValue($current_path),
+    \GetOpt\Option::create('c', 'config', \GetOpt\GetOpt::OPTIONAL_ARGUMENT)
+        ->setDescription('config json file')
+        ->setDefaultValue($current_path.'/vendor-phar.json'),
     \GetOpt\Option::create('h','help', \GetOpt\GetOpt::NO_ARGUMENT)
         ->setDescription('Show this help and quit'),
 ]);
@@ -43,5 +46,13 @@ if ($getOpt->getOption('help')) {
 $vendor = $getOpt->getOption('vendor');
 $output = $getOpt->getOption('output');
 
-$packager = new \MMHK\VendorPhar\Packager($vendor);
+$config_file = $getOpt->getOption('config');
+$config = json_decode(file_get_contents($config_file), 1);
+if ($config) {
+    $vendor = !empty($config['vendorDir']) ? $config['vendorDir'] : $vendor;
+    $output = !empty($config['baseDir']) ? $config['baseDir'] : $output;
+    $excludes = !empty($config['exclude']) ? $config['exclude'] : [];
+}
+
+$packager = new \MMHK\VendorPhar\Packager($vendor, $excludes);
 $packager->export($output);
