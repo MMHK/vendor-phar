@@ -39,3 +39,9 @@ php -d phar.readonly=0 vendor-phar -c vendor-phar.json
   ]
 }
 ```
+
+## 注意
+
+由于 `composer` 自动生成的一堆 `Autoloader` 都指定了的project root，所以 `vendor-phat` 会修改 `autoload_classmap.php`/ `autoload_files.php` / `autoload_namespaces.php` / `autoload_psr4.php` / `autoload_static.php`, 将 project root 引用到 `phar` 包里面 `.mount` 目录，并通过 `Phar::mount` 将真实的 project root 挂载到 phar 包里面的 `.mount`。
+
+基于以上修改，`vendor.phar` 并不能随便移动位置!! 移动之后将会导致 `composer` 生成的 `autoloader` 失效。
